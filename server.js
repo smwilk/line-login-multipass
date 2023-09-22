@@ -3,10 +3,21 @@ const passport = require('passport');
 const dotenv = require('dotenv');
 dotenv.config();
 const LineStrategy = require('passport-line-auth').Strategy;
+const session = require('express-session');
 
 const app = express();
-// initalize passport
+
+// Use express-session middleware
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Initialize passport
 app.use(passport.initialize());
+app.use(passport.session());
+
 passport.use(new LineStrategy({
     channelID: process.env.LINE_CHANNEL_ID,
     channelSecret: process.env.LINE_CHANNEL_SECRET,

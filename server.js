@@ -1,16 +1,19 @@
 const express = require('express');
 const passport = require('passport');
-const LineStrategy = require('passport-line').Strategy;
+const dotenv = require('dotenv');
+dotenv.config();
+const LineStrategy = require('passport-line-auth').Strategy;
 
 const app = express();
 app.use(passport.initialize());
-
 passport.use(new LineStrategy({
-    clientID: process.env.LINE_CHANNEL_ID,
+    channelID: process.env.LINE_CHANNEL_ID,
     channelSecret: process.env.LINE_CHANNEL_SECRET,
-    callbackURL: 'http://localhost:3000/auth/line/callback'
+    callbackURL: 'http://localhost:3000/auth/line/callback',
+    scope: ['profile', 'openid', 'email'],
+    botPrompt: 'normal'
 },
-    function (accessToken, refreshToken, profile, cb) {
+    function (accessToken, refreshToken, params, profile, cb) {
         return cb(null, profile);
     }));
 
@@ -31,4 +34,4 @@ app.get('/auth/line/callback',
         res.redirect('/');
     });
 
-app.listen(3000);
+app.listen(5656);

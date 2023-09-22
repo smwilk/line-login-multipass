@@ -5,6 +5,7 @@ dotenv.config();
 const LineStrategy = require('passport-line-auth').Strategy;
 
 const app = express();
+// initalize passport
 app.use(passport.initialize());
 passport.use(new LineStrategy({
     channelID: process.env.LINE_CHANNEL_ID,

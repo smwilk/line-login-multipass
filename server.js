@@ -6,7 +6,7 @@ const app = express();
 app.use(passport.initialize());
 
 passport.use(new LineStrategy({
-    channelID: process.env.LINE_CHANNEL_ID,
+    clientID: process.env.LINE_CHANNEL_ID,
     channelSecret: process.env.LINE_CHANNEL_SECRET,
     callbackURL: 'http://localhost:3000/auth/line/callback'
 },

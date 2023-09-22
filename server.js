@@ -10,7 +10,7 @@ app.use(passport.initialize());
 passport.use(new LineStrategy({
     channelID: process.env.LINE_CHANNEL_ID,
     channelSecret: process.env.LINE_CHANNEL_SECRET,
-    callbackURL: 'http://localhost:3000/auth/line/callback',
+    callbackURL: 'https://shopify-line-login.onrender.com/auth/line/callback',
     scope: ['profile', 'openid', 'email'],
     botPrompt: 'normal'
 },

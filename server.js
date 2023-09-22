@@ -1,9 +1,26 @@
-const passport = require('passport');
-const LineStrategy = require('passport-line-auth').Strategy;
 const express = require('express');
+const passport = require('passport');
+const LineStrategy = require('passport-line').Strategy;
+
 const app = express();
-const User = require('./models/user'); // assuming you have a User model defined in models/user.js
-require('dotenv').config();
+app.use(passport.initialize());
+
+passport.use(new LineStrategy({
+    channelID: process.env.LINE_CHANNEL_ID,
+    channelSecret: process.env.LINE_CHANNEL_SECRET,
+    callbackURL: 'http://localhost:3000/auth/line/callback'
+},
+    function (accessToken, refreshToken, profile, cb) {
+        return cb(null, profile);
+    }));
+
+passport.serializeUser(function (user, cb) {
+    cb(null, user);
+});
+
+passport.deserializeUser(function (obj, cb) {
+    cb(null, obj);
+});
 
 app.get('/auth/line', passport.authenticate('line'));
 
@@ -14,16 +31,4 @@ app.get('/auth/line/callback',
         res.redirect('/');
     });
 
-passport.use(new LineStrategy({
-    channelID: process.env.LINE_CHANNEL_ID,
-    channelSecret: process.env.LINE_CHANNEL_SECRET,
-    callbackURL: 'http://yourwebsite.com/auth/line/callback',
-    scope: ['profile', 'openid', 'email'],
-    botPrompt: 'normal'
-},
-    function (accessToken, refreshToken, params, profile, cb) {
-        User.findOrCreate({ lineId: profile.id }, function (err, user) {
-            return cb(err, user);
-        });
-    }
-));
+app.listen(3000);

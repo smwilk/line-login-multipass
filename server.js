@@ -46,8 +46,7 @@ app.get('/auth/line', passport.authenticate('line'));
 app.get('/auth/line/callback',
     passport.authenticate('line', { failureRedirect: '/login-failed', successRedirect: '/login' }),
     function (req, res) {
-        // Successful authentication, redirect home.
-        res.send(`Hello ${req.user.displayName}, your email is ${req.user.emails[0].value}`);
+        res.send(`Hello ${req.user.displayName}, you have successfully logged in!`);
     });
 
 app.get('/login', function (req, res) {

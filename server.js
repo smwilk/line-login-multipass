@@ -46,12 +46,16 @@ app.get('/auth/line', passport.authenticate('line'));
 app.get('/auth/line/callback',
     passport.authenticate('line', { failureRedirect: '/login-failed', successRedirect: '/login' }),
     function (req, res) {
-        res.send(`Hello ${req.user.displayName}, you have successfully logged in!`);
+        // Check if the user's email address is available
+        const email = req.user.emails ? req.user.emails[0].value : 'No email address provided';
+        res.send(`Hello ${req.user.displayName}, you have successfully logged in! Your email is ${email}`);
     });
 
 app.get('/login', function (req, res) {
     console.log("request: ", req)
-    res.send(`Successfully logged in, thanks ${req.user.displayName}. Your email is ${req.user.emails[0].value}`);
+    // Check if the user's email address is available
+    const email = req.user.emails ? req.user.emails[0].value : 'No email address provided';
+    res.send(`Successfully logged in, thanks ${req.user.displayName}. Your email is ${email}`);
 });
 
 app.get('/login-failed', function (req, res) {

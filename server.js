@@ -6,6 +6,7 @@ const LineStrategy = require('passport-line-auth').Strategy;
 const session = require('express-session');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const app = express();
 
@@ -22,6 +23,17 @@ app.use(session({
 // Initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+function generateMultipassToken(customerData) {
+    const multipassSecret = process.env.SHOPIFY_MULTIPASS_SECRET;
+    const data = Buffer.from(JSON.stringify(customerData), 'utf-8');
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-128-cbc', multipassSecret.slice(0, 16), iv);
+    const ciphertext = Buffer.concat([cipher.update(data), cipher.final()]);
+    const token = Buffer.concat([iv, ciphertext]);
+    const signature = crypto.createHmac('sha256', multipassSecret.slice(16, 32)).update(token).digest();
+    return Buffer.concat([token, signature]).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
 
 passport.use(new LineStrategy({
     channelID: process.env.LINE_CHANNEL_ID,
@@ -52,9 +64,15 @@ passport.deserializeUser(function (obj, cb) {
 app.get('/auth/line', passport.authenticate('line'));
 
 app.get('/auth/line/callback',
-    passport.authenticate('line', { failureRedirect: '/login-failed', successRedirect: '/login' }),
+    passport.authenticate('line', { failureRedirect: '/login-failed' }),
     function (req, res) {
-        res.send(`Hello ${req.user.displayName}, you have successfully logged in! Your email is ${req.user.email}`);
+        const customerData = {
+            email: req.user.email,
+            created_at: new Date().toISOString(),
+            // Add other customer information here
+        };
+        const multipassToken = generateMultipassToken(customerData);
+        res.redirect(`https://${process.env.SHOPIFY_STORE_DOMAIN}/account/login/multipass/${multipassToken}`);
     });
 
 app.get('/login', function (req, res) {

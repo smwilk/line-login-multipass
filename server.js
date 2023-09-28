@@ -47,6 +47,7 @@ app.get('/auth/line/callback',
     });
 
 app.get('/login', function (req, res) {
+    console.log("request: ", req)
     res.send(`Successfully logged in, thanks ${req.user.displayName}`);
 });
 

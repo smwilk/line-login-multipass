@@ -5,6 +5,7 @@ dotenv.config();
 const LineStrategy = require('passport-line-auth').Strategy;
 const session = require('express-session');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -30,6 +31,13 @@ passport.use(new LineStrategy({
     botPrompt: 'normal'
 },
     function (accessToken, refreshToken, params, profile, cb) {
+        // Decode the id_token to get the user's email
+        const decodedIdToken = jwt.decode(params.id_token);
+        const email = decodedIdToken ? decodedIdToken.email : 'No email address provided';
+
+        // Add the email to the user's profile
+        profile.email = email;
+
         return cb(null, profile);
     }));
 
@@ -46,16 +54,11 @@ app.get('/auth/line', passport.authenticate('line'));
 app.get('/auth/line/callback',
     passport.authenticate('line', { failureRedirect: '/login-failed', successRedirect: '/login' }),
     function (req, res) {
-        // Check if the user's email address is available
-        const email = req.user.emails ? req.user.emails[0].value : 'No email address provided';
-        res.send(`Hello ${req.user.displayName}, you have successfully logged in! Your email is ${email}`);
+        res.send(`Hello ${req.user.displayName}, you have successfully logged in! Your email is ${req.user.email}`);
     });
 
 app.get('/login', function (req, res) {
-    console.log("request: ", req)
-    // Check if the user's email address is available
-    const email = req.user.emails ? req.user.emails[0].value : 'No email address provided';
-    res.send(`Successfully logged in, thanks ${req.user.displayName}. Your email is ${email}`);
+    res.send(`Successfully logged in, thanks ${req.user.displayName}. Your email is ${req.user.email}`);
 });
 
 app.get('/login-failed', function (req, res) {

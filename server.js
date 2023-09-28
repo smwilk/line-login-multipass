@@ -43,7 +43,10 @@ app.get('/auth/line/callback',
     passport.authenticate('line', { failureRedirect: '/login' }),
     function (req, res) {
         // Successful authentication, redirect home.
-        res.redirect('/');
+        res.send(`Hello ${req.user.displayName}, you have successfully logged in!`);
     });
 
-app.listen(5656);
+app.listen(5656, function () {
+    console.log("App listening on port 5656!")
+}
+);

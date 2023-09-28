@@ -71,6 +71,7 @@ app.get('/auth/line/callback',
             created_at: new Date().toISOString(),
             // Add other customer information here
         };
+        console.log('customerData', customerData);
         const multipassToken = generateMultipassToken(customerData);
         res.redirect(`https://${process.env.SHOPIFY_STORE_DOMAIN}/account/login/multipass/${multipassToken}`);
     });

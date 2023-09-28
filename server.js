@@ -26,12 +26,17 @@ app.use(passport.session());
 
 function generateMultipassToken(customerData) {
     const multipassSecret = process.env.SHOPIFY_MULTIPASS_SECRET;
+    const keyMaterial = crypto.createHash('sha256').update(multipassSecret).digest();
+    const encryptionKey = keyMaterial.slice(0, 16);
+    const signatureKey = keyMaterial.slice(16, 32);
+
     const data = Buffer.from(JSON.stringify(customerData), 'utf-8');
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-128-cbc', multipassSecret.slice(0, 16), iv);
+    const cipher = crypto.createCipheriv('aes-128-cbc', encryptionKey, iv);
     const ciphertext = Buffer.concat([cipher.update(data), cipher.final()]);
     const token = Buffer.concat([iv, ciphertext]);
-    const signature = crypto.createHmac('sha256', multipassSecret.slice(16, 32)).update(token).digest();
+    const signature = crypto.createHmac('sha256', signatureKey).update(token).digest();
+
     return Buffer.concat([token, signature]).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 

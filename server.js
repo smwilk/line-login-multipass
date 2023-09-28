@@ -40,13 +40,22 @@ passport.deserializeUser(function (obj, cb) {
 app.get('/auth/line', passport.authenticate('line'));
 
 app.get('/auth/line/callback',
-    passport.authenticate('line', { failureRedirect: '/login', successRedirect: '/' }),
+    passport.authenticate('line', { failureRedirect: '/login-failed', successRedirect: '/login' }),
     function (req, res) {
         // Successful authentication, redirect home.
         res.send(`Hello ${req.user.displayName}, you have successfully logged in!`);
     });
 
+app.get('/login', function (req, res) {
+    console.log("req", req.user);
+    res.send('Successfully logged in, thanks ', req.user.displayName);
+});
+
+app.get('/login-failed', function (req, res) {
+    console.log("req", req.user);
+    res.send('Login failed');
+});
+
 app.listen(5656, function () {
-    console.log("App listening on port 5656!")
-}
-);
+    console.log("App listening on port 5656!");
+});

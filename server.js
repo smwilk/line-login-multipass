@@ -82,7 +82,7 @@ app.get('/auth/line/callback',
         const customerData = {
             email: req.user.email,
             created_at: new Date().toISOString(),
-            // Add other customer information here
+            identifier: "123456" // Testing
         };
         console.log('customerData', customerData);
         const multipassToken = generateMultipassToken(customerData);
